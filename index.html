@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tactical Archive | Survey Corps Intelligence</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Special+Elite&display=swap');
+
+        :root {
+            --scout-green: #2d4635;
+            --titan-gold: #c5a059;
+            --iron-grey: #1a1a1a;
+            --parchment: #e4d5b7;
+            --blood-red: #8b0000;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--iron-grey);
+            font-family: 'Special Elite', cursive;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- IMMERSIVE LANDING PAGE --- */
+        #landingPage {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1.5s ease-out, visibility 1.5s;
+        }
+
+        .landing-content { text-align: center; color: var(--parchment); }
+        .landing-title { font-family: 'Cinzel', serif; font-size: 2.8rem; color: var(--titan-gold); letter-spacing: 2px; }
+        .landing-warning { font-size: 0.8rem; color: var(--blood-red); margin-top: 10px; letter-spacing: 3px; }
+
+        .enter-btn {
+            background: transparent;
+            border: 2px solid var(--scout-green);
+            color: var(--parchment);
+            padding: 15px 50px;
+            font-family: 'Cinzel', serif;
+            cursor: pointer;
+            transition: 0.4s;
+            margin-top: 30px;
+            letter-spacing: 2px;
+        }
+        .enter-btn:hover { background: var(--scout-green); box-shadow: 0 0 25px var(--scout-green); }
+        .fade-out { opacity: 0 !important; visibility: hidden !important; }
+
+        /* --- SCOUT INTERFACE --- */
+        .header {
+            background: #000;
+            border-bottom: 2px solid var(--scout-green);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo { font-family: 'Cinzel', serif; color: var(--parchment); font-size: 1.1rem; }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            background: url('https://www.transparenttextures.com/patterns/aged-paper.png'), var(--parchment);
+        }
+
+        /* LEFT SIDEBAR: EXPEDITION LOGS */
+        .sidebar-left {
+            width: 250px;
+            background: var(--scout-green);
+            color: white;
+            padding: 1.5rem;
+            border-right: 5px double var(--titan-gold);
+        }
+
+        .season-btn {
+            background: rgba(0,0,0,0.4);
+            border-left: 4px solid transparent;
+            color: var(--parchment);
+            padding: 14px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            font-size: 0.85rem;
+            transition: 0.3s;
+        }
+
+        .season-btn.active { border-left-color: var(--titan-gold); background: rgba(0,0,0,0.6); }
+
+        /* CENTER: MISSION GRID */
+        .content-center { flex: 1; padding: 2rem; overflow-y: auto; }
+        .anime-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 25px;
+        }
+
+        .episode-card {
+            background: #fff;
+            padding: 12px;
+            border: 1px solid #aaa;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .episode-card:hover { border-color: var(--blood-red); background: #fdfdfd; }
+
+        .poster-frame { height: 135px; background: #222; margin-bottom: 10px; overflow: hidden; border: 1px solid #000; }
+        .poster-frame img { width: 100%; height: 100%; object-fit: cover; filter: sepia(0.2); }
+
+        /* RIGHT: FIELD RECON */
+        .sidebar-right {
+            width: 400px;
+            background: rgba(0,0,0,0.08);
+            border-left: 2px solid var(--scout-green);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .recon-header { padding: 1.2rem; background: var(--iron-grey); color: var(--titan-gold); font-family: 'Cinzel', serif; text-align: center; font-size: 0.9rem; }
+        .scroll-container { flex: 1; overflow-y: auto; padding: 1.5rem; }
+        
+        .category-title {
+            font-family: 'Cinzel', serif;
+            color: var(--blood-red);
+            font-size: 0.85rem;
+            margin: 25px 0 12px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.2);
+            padding-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .fact-box {
+            background: rgba(255,255,255,0.6);
+            border: 1px solid #bbb;
+            padding: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .fact-box:hover { background: #fff; border-color: var(--scout-green); }
+        .fact-title { font-family: 'Cinzel', serif; color: var(--iron-grey); font-size: 0.95rem; }
+
+        /* --- MODAL --- */
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92);
+            z-index: 3000;
+            justify-content: center; align-items: center;
+        }
+
+        .modal-content {
+            background: var(--parchment);
+            width: 580px;
+            max-height: 88vh;
+            padding: 40px;
+            border: 10px double var(--scout-green);
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 2.5rem; cursor: pointer; color: var(--blood-red); }
+
+        .admin-stamp {
+            margin-top: 30px;
+            border: 2px solid var(--blood-red);
+            padding: 8px;
+            display: inline-block;
+            transform: rotate(-5deg);
+            color: var(--blood-red);
+            font-family: 'Cinzel', serif;
+            font-weight: bold;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="landingPage">
+        <div class="landing-content">
+            <h1 class="landing-title">RECOVERY OF THE LOST SCROLLS</h1>
+            <p class="landing-warning">OFFICIAL ACCESS GRANTED // SURVEY CORPS PERSONNEL ONLY</p>
+            <button class="enter-btn" onclick="enterArchive()">DEDICATE YOUR HEART</button>
+        </div>
+    </div>
+
+    <header class="header">
+        <div class="logo">PARADIS ISLAND MILITARY // TACTICAL ARCHIVE</div>
+        <div style="color: var(--titan-gold); font-size: 0.7rem; font-family: 'Cinzel';">LOGGED AS: ARCHIVE_MASTER_DEBANGANA</div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar-left">
+            <h4 style="margin-bottom: 25px; font-family: 'Cinzel'; color: var(--titan-gold); letter-spacing: 2px;">EXPEDITION LOGS</h4>
+            <div class="season-btn active" onclick="loadSeason(1, this)">I. THE STRUGGLE</div>
+            <div class="season-btn" onclick="loadSeason(2, this)">II. THE TRAITORS</div>
+            <div class="season-btn" onclick="loadSeason(3, this)">III. THE TRUTH</div>
+            <div class="season-btn" onclick="loadSeason(4, this)">IV. THE FINALITY</div>
+
+            <div style="margin-top: 50px; text-align: center;">
+                <div class="admin-stamp">VERIFIED BY<br>D. DUTTA</div>
+            </div>
+        </aside>
+
+        <main class="content-center">
+            <h2 id="heading" style="margin-bottom: 30px; font-family: 'Cinzel'; font-size: 1.5rem; border-left: 4px solid var(--scout-green); padding-left: 15px;">MISSION BRIEFINGS</h2>
+            <div class="anime-grid" id="episodeGrid"></div>
+        </main>
+
+        <aside class="sidebar-right">
+            <div class="recon-header">FIELD RECONNAISSANCE</div>
+            <div class="scroll-container" id="characterList"></div>
+        </aside>
+    </div>
+
+    <div id="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle" style="text-align: center; color: var(--blood-red); font-family: 'Cinzel'; margin-bottom: 10px;"></h2>
+            <div id="modalImg" style="width: 100%; height: 280px; background-size: cover; background-position: center; margin: 20px 0; border: 1px solid #000;"></div>
+            <h4 id="detailHeader" style="font-family: 'Cinzel'; color: var(--scout-green); margin-bottom: 12px; border-bottom: 1px solid #ccc;">MISSION REPORT:</h4>
+            <p id="modalDesc" style="line-height: 1.7; font-size: 1rem; color: #111;"></p>
+        </div>
+    </div>
+
+    <script>
+        // Data persists from previous implementation for consistency
+        const seasonIDs = { 1: 16498, 2: 25777, 3: 35760, 4: 40028 };
+        let currentEpisodes = [];
+
+        const archiveSummaries = {
+            1: "The Colossal Titan breaches Wall Maria; Eren’s mother is eaten.",
+            2: "Refugees flee to Wall Rose; Eren, Mikasa, and Armin join the military.",
+            3: "The trio begins cadet training; Eren struggles with balance but succeeds.",
+            4: "Recruits graduate; the Colossal Titan reappears at Trost.",
+            5: "Eren is swallowed by a Titan while saving Armin.",
+            6: "Mikasa’s backstory is revealed; she loses hope but keeps fighting.",
+            7: "A mysterious 'Rogue Titan' appears and starts killing other Titans.",
+            8: "The Rogue Titan is revealed to be Eren emerging from its neck.",
+            9: "The military threatens Eren; he partially transforms to protect his friends.",
+            10: "Armin’s speech saves Eren; Pyxis plans to use Eren to seal the wall.",
+            11: "Eren loses control in Titan form and attacks Mikasa during the mission.",
+            12: "Armin wakes Eren; the plan to move the boulder resumes.",
+            13: "Eren seals the hole; humanity wins its first victory.",
+            14: "Eren is court-martialed and placed under Captain Levi’s custody.",
+            15: "Eren meets Levi’s squad and researcher Hange Zoë.",
+            16: "The 104th recruits decide which military branch to join.",
+            17: "The Survey Corps expedition begins; the Female Titan appears.",
+            18: "The Female Titan chases the scouts into a giant forest.",
+            19: "Eren trusts Levi’s squad instead of transforming.",
+            20: "The Female Titan is trapped but calls other Titans to eat her body to escape.",
+            21: "The Female Titan kills Levi’s squad; Eren transforms but is defeated.",
+            22: "Levi and Mikasa rescue Eren; the expedition returns in failure.",
+            23: "Annie is cornered in Stohess and revealed as the Female Titan.",
+            24: "Eren and Annie fight; the city of Stohess is heavily damaged.",
+            25: "Annie encases herself in crystal; a Titan face is seen inside the wall.",
+            26: "Titans appear inside Wall Rose; Miche is killed by the Beast Titan.",
+            27: "Sasha and Conny return to their villages; Conny finds a Titan on his house.",
+            28: "The scouts search for a breach in the wall but find nothing.",
+            29: "Recruits are trapped at Utgard Castle; Ymir reveals she is a Titan.",
+            30: "Ymir fights to save the recruits; Historia reveals her true name.",
+            31: "Reiner and Bertholdt reveal they are the Armored and Colossal Titans.",
+            32: "Eren fights Reiner; Bertholdt falls on them to end the battle.",
+            33: "The scouts chase the traitors; Hange deduces they are heading to the forest.",
+            34: "Reiner and Bertholdt rest in the forest with their captives, Eren and Ymir.",
+            35: "Ymir chooses to help the traitors to protect Historia.",
+            36: "Erwin leads a charge to rescue Eren; he loses his arm in the process.",
+            37: "Eren uses the Founding Titan’s power (The Coordinate) to command Titans.",
+            38: "Levi’s squad goes into hiding; the government targets the Survey Corps.",
+            39: "Levi fights Kenny the Ripper; Eren and Historia are kidnapped.",
+            40: "Hange uncovers the truth about the Reiss family and the monarchy.",
+            41: "The Survey Corps is framed; Erwin stands trial before the King.",
+            42: "A coup d'état overthrows the government; the fake King is deposed.",
+            43: "Rod Reiss explains the history of the Founding Titan to Historia.",
+            44: "Eren realizes his father stole the Founder; Kenny’s backstory is shown.",
+            45: "Rod Reiss transforms into a massive, crawling Titan.",
+            46: "The Survey Corps kills Rod Reiss; Historia is crowned Queen.",
+            47: "Kenny’s final moments; he gives Levi the Titan serum.",
+            48: "Eren meets Keith Shadis, who reveals the truth about Eren's father.",
+            49: "The scouts prepare to retake Wall Maria.",
+            50: "The battle begins; Reiner is discovered hiding inside the wall.",
+            51: "The Beast Titan arrives and traps the scouts with a boulder barrage.",
+            52: "Bertholdt transforms into the Colossal Titan, causing massive destruction.",
+            53: "Erwin leads a suicide charge; Levi nearly kills the Beast Titan.",
+            54: "Armin sacrifices himself to defeat the Colossal Titan; Eren captures Bertholdt.",
+            55: "The 'Serum Choice': Levi chooses to save Armin over Erwin. Armin eats Bertholdt.",
+            56: "Eren and the survivors finally reach the basement.",
+            57: "Grisha’s backstory: The world outside the walls (Marley) is revealed.",
+            58: "Eren learns about the 13-year lifespan of Shifters (Ymir's Curse).",
+            59: "The scouts reach the ocean; Eren wonders if killing enemies across the sea will bring freedom.",
+            60: "Four years later, Marley finishes a war against the Mid-East Alliance.",
+            61: "Warrior candidates (Falco, Gabi) compete; Reiner returns home.",
+            62: "Reiner reflects on his childhood and the guilt of the mission to Paradis.",
+            63: "Falco helps a 'wounded soldier' (Eren in disguise) send letters.",
+            64: "Willy Tybur declares war on Paradis; Eren and Reiner meet.",
+            65: "Eren transforms in Marley, killing Willy and starting a massacre.",
+            66: "The Survey Corps arrives in Liberio; Eren fights the War Hammer Titan.",
+            67: "Eren eats the War Hammer; Gabi boards the airship and kills Sasha.",
+            68: "Paradis reflects on the 'Brave Volunteers' like Yelena and Onyankopon.",
+            69: "Historia’s pregnancy and the plan to pass down the Beast Titan are discussed.",
+            70: "Gabi and Falco escape prison and hide in the Paradis countryside.",
+            71: "The 'Jaegerists' rebel against the military; Premier Zachary is killed.",
+            72: "Gabi meets Sasha's family; Nicolo reveals the wine is spiked with Zeke's fluid.",
+            73: "Eren confronts Mikasa and Armin, telling Mikasa he 'hates' her.",
+            74: "Zeke’s backstory and his 'Euthanization Plan' are revealed.",
+            75: "Marley launches a surprise counter-invasion on Shiganshina.",
+            76: "Eren fights Reiner and Galliard while Marleyan airships attack.",
+            77: "The battle intensifies; Zeke arrives and starts throwing rocks.",
+            78: "Zeke screams, turning the military into Titans; Colt dies; Gabi shoots Eren’s head off.",
+            79: "Eren and Zeke travel through memories; Eren manipulated Grisha in the past.",
+            80: "The Rumbling begins. Ymir Fritz's past is revealed; Eren gains the full power of the Founder.",
+            81: "The Walls crumble; the Colossal Titans begin their march.",
+            82: "Annie wakes up from her crystal; Armin tries to manage the chaos.",
+            83: "Connie tries to feed Falco to his mother; the 'Alliance' begins to form.",
+            84: "The scouts and Marleyan warriors share a meal and discuss their sins.",
+            85: "The Alliance fights the Jaegerists at the harbor to get the flying boat.",
+            86: "A brutal battle at the harbor; Magath and Keith Shadis sacrifice themselves.",
+            87: "The Rumbling reaches the shores of Marley; Eren's transformation is complete.",
+            88: "The Alliance catches up to Eren. Hange sacrifices herself to buy time.",
+            89: "The Final Battle. Mikasa kills Eren. The power of the Titans vanishes."
+        };
+
+        const characterFacts = {
+            "Eren Yeager": { cat: "I. The Attackers", desc: "Holds the Attack, Founding, and War Hammer Titans. Only one known to influence the past.", img: "images/eren.jpg" },
+            "Mikasa Ackerman": { cat: "I. The Attackers", desc: "Ackerman/Azumabito descent. Immense strength from 'awakening' her bloodline powers.", img: "images/mikasa.jpg" },
+            "Armin Arlert": { cat: "I. The Attackers", desc: "Tactical genius. Inheritor of the Colossal Titan. 15th Commander of the Survey Corps.", img: "images/armin1.jpg" },
+            "Levi Ackerman": { cat: "II. High Command", desc: "Humanity's Strongest. Known for spinning combat style and clinical cleanliness.", img: "images/levi.jpg" },
+            "Erwin Smith": { cat: "II. High Command", desc: "13th Commander. Led the suicide charge to retake Wall Maria.", img: "images/erwin.jpg" },
+            "Hange Zoë": { cat: "II. High Command", desc: "14th Commander. Researcher who created the Thunder Spears.", img: "images/hange.jpg" },
+            "Reiner Braun": { cat: "III. Marleyan Warriors", desc: "The Armored Titan. Survives fatal blows by transferring consciousness through his nervous system.", img: "images/reiner.jpg" },
+            "Bertholdt Hoover": { cat: "III. Marleyan Warriors", desc: "Original Colossal Titan. Initially reserved; viewed himself as a pawn of fate.", img: "images/berthold.jpg" },
+            "Annie Leonhart": { cat: "III. Marleyan Warriors", desc: "The Female Titan. Encased herself in crystal for years to avoid interrogation.", img: "images/annie.jpg" },
+            "Zeke Yeager": { cat: "III. Marleyan Warriors", desc: "The Beast Titan. Marley's Warchief. Planned the Eldian Euthanization Plan.", img: "images/zeke.jpg" },
+            "Sasha Blouse": { cat: "IV. Identified Cadets", desc: "Potato Girl. Hunter with incredible instinct. Symbolized simple joys of life.", img: "images/sasha.jpg" },
+            "Jean Kirschtein": { cat: "IV. Identified Cadets", desc: "Grew from wanting a cushy life to becoming the group's grounded human voice.", img: "images/jean.jpg" },
+            "Historia Reiss": { cat: "IV. Identified Cadets", desc: "Queen of the Walls. Transitioned from the Christa Lenz persona to true royalty.", img: "images/historia.jpg" }
+        };
+
+        function enterArchive() { document.getElementById('landingPage').classList.add('fade-out'); }
+
+        function populateCharacters() {
+            const list = document.getElementById('characterList');
+            list.innerHTML = "";
+            const cats = ["I. The Attackers", "II. High Command", "III. Marleyan Warriors", "IV. Identified Cadets"];
+            cats.forEach(c => {
+                list.innerHTML += `<div class="category-title">${c}</div>`;
+                for (let name in characterFacts) {
+                    if (characterFacts[name].cat === c) {
+                        list.innerHTML += `<div class="fact-box" onclick="showCharacterFact('${name}')"><div class="fact-title">${name}</div></div>`;
+                    }
+                }
+            });
+        }
+
+        async function loadSeason(num, btn) {
+            const grid = document.getElementById('episodeGrid');
+            document.querySelectorAll('.season-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            try {
+                const res = await fetch(`https://api.jikan.moe/v4/anime/${seasonIDs[num]}/episodes`);
+                const { data } = await res.json();
+                currentEpisodes = data;
+                grid.innerHTML = "";
+                data.forEach((ep, i) => {
+                    const img = `images/ep${ep.mal_id}.jpg`;
+                    grid.innerHTML += `
+                        <div class="episode-card" onclick="openDetails(${i}, '${img}')">
+                            <div class="poster-frame"><img src="${img}" onerror="this.src='https://via.placeholder.com/300x200?text=MISSING_INTEL'"></div>
+                            <div style="font-weight:bold; font-size:0.8rem; color: var(--scout-green);">MISSION ${ep.mal_id}</div>
+                            <div style="font-size:0.75rem; margin-top:5px;">${ep.title}</div>
+                        </div>`;
+                });
+            } catch (e) { grid.innerHTML = "<p>Expedition failed. Communication lines severed.</p>"; }
+        }
+
+        function openDetails(i, img) {
+            const ep = currentEpisodes[i];
+            document.getElementById('modalTitle').innerText = ep.title;
+            document.getElementById('modalImg').style.backgroundImage = `url('${img}')`;
+            document.getElementById('modalDesc').innerText = archiveSummaries[ep.mal_id] || "Classified mission data.";
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function showCharacterFact(name) {
+            const char = characterFacts[name];
+            document.getElementById('modalTitle').innerText = name;
+            document.getElementById('modalImg').style.backgroundImage = `url('${char.img}')`;
+            document.getElementById('modalDesc').innerText = char.desc;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+        window.onload = () => { loadSeason(1, document.querySelector('.season-btn')); populateCharacters(); };
+    </script>
+</body>
+</html>
